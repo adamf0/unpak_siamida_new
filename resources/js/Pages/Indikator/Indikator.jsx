@@ -91,13 +91,13 @@ const Indikator = ({selected="",level}) => {
                 });
             }
         } catch (error) {
-            // console.error(error.response?.data)
             const status = error.response?.status;
-            const detail =
-                error.response?.description ?? "ada masalah pada aplikasi";
+            const rawResponse = error.response?.data;
+            console.error(rawResponse);
 
-            alert(detail);
-            console.error(detail);
+            if(![200,204].includes(status) && rawResponse?.title!=="Indikator.EmptyData"){
+                alert(rawResponse?.description ?? "ada masalah pada aplikasi");
+            }
         } finally {
             setLoading(false);
         }
@@ -217,6 +217,7 @@ const Indikator = ({selected="",level}) => {
             if (response.status === 200 || response.status === 204) {
                 toast.success('Berhasil disimpan!');
                 setPage(1)
+                loadData()
             }
         } catch (error) {
             // console.error(error.response?.data)
@@ -248,6 +249,7 @@ const Indikator = ({selected="",level}) => {
             if (response.status === 200 || response.status === 204) {
                 toast.success('Berhasil disimpan!');
                 setPage(1)
+                loadData()
             }
         } catch (error) {
             // console.error(error.response?.data)
@@ -280,6 +282,7 @@ const Indikator = ({selected="",level}) => {
             if (response.status === 200 || response.status === 204) {
                 toast.success('Berhasil diupdate!');
                 setPage(1)
+                loadData()
             }
         } catch (error) {
             // console.error(error.response?.data)

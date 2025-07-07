@@ -101,6 +101,13 @@ const AdminPage = ({children, selected="", level=null}) => {
               </a>
           </li>
 
+          <li className="nav-item">
+              <a className={classNames(`nav-link`, selected!="master_tahun"? `collapsed`:``)} href="/master_tahun">
+                  <i className="bi bi-calendar"></i>
+                  <span>Master Tahun</span>
+              </a>
+          </li>
+
           <li className="nav-heading">Data Template</li>
 
           <li className="nav-item">

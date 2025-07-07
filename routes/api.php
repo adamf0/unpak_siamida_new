@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiIndikatorController;
 use App\Http\Controllers\ApiJenisFileRenstraController;
+use App\Http\Controllers\ApiMasterTahunController;
 use App\Http\Controllers\ApiStandarRenstraController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,3 +25,9 @@ Route::post('/master_indikator_renstra', [ApiIndikatorController::class, 'store'
 Route::put('/master_indikator_renstra', [ApiIndikatorController::class, 'update'])->name('api_master_indikator_renstra.update');
 Route::delete('/master_indikator_renstra/{id}', [ApiIndikatorController::class, 'destroy'])->name('api_master_indikator_renstra.destroy');
 Route::get('/master_indikator_renstra/{id}', [ApiIndikatorController::class, 'detail'])->name('api_master_indikator_renstra.detail');
+
+Route::get('/master_tahun', [ApiMasterTahunController::class, 'index'])->name('api_master_tahun.index');
+Route::post('/master_tahun', [ApiMasterTahunController::class, 'store'])->name('api_master_tahun.store');
+Route::put('/master_tahun', [ApiMasterTahunController::class, 'update'])->name('api_master_tahun.update');
+Route::delete('/master_tahun/{id}', [ApiMasterTahunController::class, 'destroy'])->name('api_master_tahun.destroy');
+Route::get('/master_tahun/{id}', [ApiMasterTahunController::class, 'detail'])->name('api_master_tahun.detail');

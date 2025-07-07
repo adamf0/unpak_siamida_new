@@ -7,7 +7,7 @@ import Pagination from "@src/Components/Pagination ";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import Input from "@src/Components/Input";
 
-const JenisFile = ({selected="",level}) => {
+const MasterTahun = ({selected="",level}) => {
     const [id, setId] = useState(null);
     const [openModal, setOpenModal] = useState(null);
     const modalRef = useRef();
@@ -20,13 +20,13 @@ const JenisFile = ({selected="",level}) => {
     const [page, setPage] = useState(1);
     const [dataSource, setDataSource] = useState([]);
 
-    const [jenisFile, setJenisFile] = useState(null);
+    const [tahun, setTahun] = useState(null);
     
     async function loadData(){
         setLoading(true);
         try {
-            console.log(`execute loadData to call /api/jenis_file_renstra`);
-            const response = await apiProduction.get(`/api/jenis_file_renstra?page=${page}`, {
+            console.log(`execute loadData to call /api/master_tahun`);
+            const response = await apiProduction.get(`/api/master_tahun?page=${page}`, {
                 filter: ""
             });
 
@@ -47,7 +47,7 @@ const JenisFile = ({selected="",level}) => {
             const rawResponse = error.response?.data;
             console.error(rawResponse);
 
-            if(![200,204].includes(status) && rawResponse?.title!=="JenisFile.EmptyData"){
+            if(![200,204].includes(status) && rawResponse?.title!=="MasterTahun.EmptyData"){
                 alert(rawResponse?.description ?? "ada masalah pada aplikasi");
             }
         } finally {
@@ -67,25 +67,25 @@ const JenisFile = ({selected="",level}) => {
     }
     function addHandler() {
         setId(null);
-        setJenisFile(null)
+        setTahun(null)
         setOpenModal("add")
     }
     function editHandler(data) {
         setId(data.id);
-        setJenisFile(data.nama)
+        setTahun(data.tahun)
         setOpenModal("edit")
     }
     function deleteHandler(data) {
         setId(data.id);
-        setJenisFile(data.nama)
+        setTahun(data.tahun)
         setOpenModal("delete")
     }
     async function deleteProcess() {
         setLoadingModal(true);
         openModalDelete()
         try {
-            console.log(`execute loadData to call /api/jenis_file_renstra`);
-            const response = await apiProduction.delete(`/api/jenis_file_renstra/${id}`);
+            console.log(`execute loadData to call /api/master_tahun`);
+            const response = await apiProduction.delete(`/api/master_tahun/${id}`);
 
             if (response.status === 200 || response.status === 204) {
                 toast.success('Berhasil disimpan!');
@@ -109,8 +109,8 @@ const JenisFile = ({selected="",level}) => {
         setLoadingModal(true);
         openModalForm();
         try {
-            console.log(`execute loadData to call /api/jenis_file_renstra`);
-            const response = await apiProduction.post("/api/jenis_file_renstra", {nama: jenisFile});
+            console.log(`execute loadData to call /api/master_tahun`);
+            const response = await apiProduction.post("/api/master_tahun", {tahun: tahun});
 
             if (response.status === 200 || response.status === 204) {
                 toast.success('Berhasil disimpan!');
@@ -134,8 +134,8 @@ const JenisFile = ({selected="",level}) => {
         setLoadingModal(true);
         openModalForm();
         try {
-            console.log(`execute loadData to call /api/jenis_file_renstra`);
-            const response = await apiProduction.put("/api/jenis_file_renstra", {nama: jenisFile, id: id});
+            console.log(`execute loadData to call /api/master_tahun`);
+            const response = await apiProduction.put("/api/master_tahun", {tahun: tahun, id: id});
 
             if (response.status === 200 || response.status === 204) {
                 toast.success('Berhasil diupdate!');
@@ -211,11 +211,11 @@ const JenisFile = ({selected="",level}) => {
 
     return <AdminPage selected={selected} level={level}>
         <div className="pagetitle">
-            <h1>Jenis File</h1>
+            <h1>Master Tahun</h1>
             <nav>
                 <ol className="breadcrumb">
                     <li className="breadcrumb-item"><a href="#">Home</a></li>
-                    <li className="breadcrumb-item active">Jenis File</li>
+                    <li className="breadcrumb-item active">Master Tahun</li>
                 </ol>
             </nav>
         </div>
@@ -228,7 +228,7 @@ const JenisFile = ({selected="",level}) => {
                 {loading
                     ? "Loading..."
                     : (dataSource?.data ?? []).map(source => <Items idx={source?.id} 
-                                                                title={source?.nama} open={source?.open} 
+                                                                title={source?.tahun} open={source?.open} 
                                                                 actionHandler={()=>actionHandler(source?.id)}
                                                                 editHandler={()=>editHandler(source)}
                                                                 deleteHandler={()=>deleteHandler(source)}
@@ -259,7 +259,7 @@ const JenisFile = ({selected="",level}) => {
                         ></button>
                     </div>
                     <div className="modal-body">
-                        <h5 className="modal-title">Anda yakin ingin hapus data "{jenisFile}" ?</h5>
+                        <h5 className="modal-title">Anda yakin ingin hapus data "{MasterTahun}" ?</h5>
                     </div>
                     <div className="modal-footer">
                         <button
@@ -296,9 +296,9 @@ const JenisFile = ({selected="",level}) => {
                         <div class="mb-4">
                             <Input
                                 label="Tahun"
-                                placeholder="Masukkan jenis file"
-                                value={jenisFile}
-                                onChange={(e) => setJenisFile(e.target.value)}
+                                placeholder="Masukkan tahun"
+                                value={tahun}
+                                onChange={(e) => setTahun(e.target.value)}
                             />
                         </div>
                     </div>
@@ -314,7 +314,7 @@ const JenisFile = ({selected="",level}) => {
 };
 const Items = ({idx, title, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}}) => {
     return <div key={idx} className="relative bg-white shadow-md rounded-lg p-4 border-l-4 border-green-500">
-                    <p className="text-sm font-semibold break-words mb-3 me-4">{title}</p>
+                    <p className="text-sm font-semibold break-words mb-3 me-4">Tahun {title}</p>
                     <div className="absolute top-3 right-3">
                         <button className="p-2 rounded-full hover:bg-gray-200" onClick={actionHandler}>
                             <BsThreeDotsVertical  />
@@ -329,4 +329,4 @@ const Items = ({idx, title, open=false, actionHandler=()=>{}, deleteHandler=()=>
                 </div>
 }
 
-export default JenisFile;
+export default MasterTahun;

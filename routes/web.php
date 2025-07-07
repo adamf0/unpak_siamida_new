@@ -3,6 +3,7 @@
 use App\Http\Controllers\JenisFileRenstraController;
 use App\Http\Controllers\MasterIndikatorRenstraController;
 use App\Http\Controllers\MasterStandarRenstraController;
+use App\Http\Controllers\MasterTahunController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', [LoginController::class, 'index'])->name('login.index');
@@ -250,6 +251,10 @@ use Illuminate\Support\Facades\Route;
 
     // Route::middleware('role:Laporan Renstra,admin')->group(function () {
     //     Route::get('/laporan_renstra/{type}', [LaporanRenstraController::class, 'index'])->name('laporan_renstra');
+    // });
+
+    // Route::middleware('role:Laporan Renstra,admin')->group(function () {
+        Route::get('/master_tahun', [MasterTahunController::class, 'index'])->name('master_tahun');
     // });
 // });
 
