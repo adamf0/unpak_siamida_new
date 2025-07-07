@@ -6,13 +6,14 @@ import 'react-toastify/dist/ReactToastify.css';
 import Pagination from "@src/Components/Pagination ";
 import Select from "@src/Components/Select";
 import { CiCalendarDate } from "react-icons/ci";
-import { BsListNested, BsThreeDotsVertical } from "react-icons/bs";
-import { IoText } from "react-icons/io5";
-import { VscSymbolOperator } from "react-icons/vsc";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import Input from "@src/Components/Input";
+import { MdAbc } from "react-icons/md";
+import { BiUser } from "react-icons/bi";
+import { formatDate } from '@src/Utility';
 
-//[PR] masih bermaslaah pada modl jika berhasil add/update tidak dapat terpanggil lagi
-const Indikator = ({selected="",level}) => {
+//[PR] level & fakultas_unit belum di set value dari login
+const Aktivitas = ({selected="",level,fakultas_unit=null}) => {
     const [id, setId] = useState(null);
     const [openModal, setOpenModal] = useState(null);
     const modalRef = useRef();
@@ -25,57 +26,20 @@ const Indikator = ({selected="",level}) => {
     const [page, setPage] = useState(1);
     const [dataSource, setDataSource] = useState([]);
 
-    const [tahun, setTahun] = useState(null);
-    const [standarRenstra, setStandarRenstra] = useState(null);
-    const [indikator, setIndikator] = useState(null);
-    const [subIndikator, setSubIndikator] = useState(null);
-    const [tipetarget, setTipetarget] = useState(null);
-    const [operator, setOperator] = useState(null);
+    const [mataProgram, setMataProgram] = useState(null);
+    const [aktivitas, setAktivitas] = useState(null);
+    const [pic, setPic] = useState(null);
+    const [tanggalAwal, setTanggalAwal] = useState(null);
+    const [tanggalAkhir, setTanggalAkhir] = useState(null);
     
-    const [listStandarRenstra, setListStandarRenstra] = useState([]);
-    const [loadingStandarRenstra, setLoadingStandarRenstra] = useState(false);
-
-    const [listSubIndikator, setListSubIndikator] = useState([]);
-    const [loadingSubIndikator, setLoadingSubIndikator] = useState(false);
-
-    const listTipeTarget = [
-        {
-            id:"numerik",
-            text:"numerik",
-        },
-        {
-            id:"kategori",
-            text:"kategori",
-        },
-        {
-            id:"range",
-            text:"range",
-        },
-    ];
-    const listOperator = [
-        {
-            id:">",
-            text:">",
-        },
-        {
-            id:">=",
-            text:">=",
-        },
-        {
-            id:"<",
-            text:"<",
-        },
-        {
-            id:"<=",
-            text:"<=",
-        },
-    ];
+    const [listMataProgram, setListMataProgram] = useState([]);
+    const [loadingMataProgram, setLoadingMataProgram] = useState(false);
     
     async function loadData(){
         setLoading(true);
         try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.get(`/api/master_indikator_renstra?page=${page}`, {
+            console.log(`execute loadData to call /api/aktivitas`);
+            const response = await apiProduction.get(`/api/aktivitas?page=${page}`, {
                 filter: ""
             });
 
@@ -96,59 +60,35 @@ const Indikator = ({selected="",level}) => {
             const rawResponse = error.response?.data;
             console.error(rawResponse);
 
-            if(![200,204].includes(status) && rawResponse?.title!=="Indikator.EmptyData"){
+            if(![200,204].includes(status) && rawResponse?.title!=="Aktivitas.EmptyData"){
                 alert(rawResponse?.description ?? "ada masalah pada aplikasi");
             }
         } finally {
             setLoading(false);
         }
     }
-    async function loadStandarRenstra(){
-        setLoadingStandarRenstra(true);
+    async function loadMataProgram(){
+        setLoadingMataProgram(true);
         try {
-            console.log(`execute loadData to call /api/master_standar_renstra`);
-            const response = await apiProduction.get(`/api/master_standar_renstra/list`, {
+            console.log(`execute loadData to call /api/mata_program`);
+            const response = await apiProduction.get(`/api/mata_program/list`, {
                 filter: ""
             });
 
             if (response.status === 200 || response.status === 204) {
                 const rawData = response?.data ?? {};
-                setListStandarRenstra(rawData);
+                setListMataProgram(rawData);
             }
         } catch (error) {
             const status = error.response?.status;
             const rawResponse = error.response?.data;
             console.error(rawResponse);
 
-            if(![200,204].includes(status) && rawResponse?.title!=="Indikator.EmptyData"){
-                alert(rawResponse?.description!=null? "data standar renstra kosong":"ada masalah saat mengambil data standar renstra");
+            if(![200,204].includes(status) && rawResponse?.title!=="MataProgram.EmptyData"){
+                alert(rawResponse?.description!=null? "data mata program kosong":"ada masalah saat mengambil data mata program");
             }
         } finally {
-            setLoadingStandarRenstra(false);
-        }
-    }
-    async function loadIndikator(){
-        setLoadingSubIndikator(true);
-        try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.get(`/api/master_indikator_renstra/list`, {
-                filter: ""
-            });
-
-            if (response.status === 200 || response.status === 204) {
-                const rawData = response?.data ?? {};
-                setListSubIndikator(rawData);
-            }
-        } catch (error) {
-            const status = error.response?.status;
-            const rawResponse = error.response?.data;
-            console.error(rawResponse);
-
-            if(![200,204].includes(status) && rawResponse?.title!=="Indikator.EmptyData"){
-                alert(rawResponse?.description!=null? "data indikator kosong":"ada masalah saat mengambil data indikator");
-            }
-        } finally {
-            setLoadingSubIndikator(false);
+            setLoadingMataProgram(false);
         }
     }
     function actionHandler(id) {
@@ -164,56 +104,47 @@ const Indikator = ({selected="",level}) => {
     }
 
     function loadSelect(target=null){
-        if(target==="standarRenstra"){
-            setListStandarRenstra([]);
-            loadStandarRenstra();
-        }
-        if(target==="indikator"){
-            setListSubIndikator([]);
-            loadIndikator();
+        if(target==="mataProgram"){
+            setListMataProgram([]);
+            loadMataProgram();
         }
     }
     function addHandler() {
         setId(null);
-        setTahun(null)
-        setStandarRenstra(null)
-        setIndikator(null)
-        setSubIndikator(null)
-        setTipetarget(null)
-        setOperator(null)
+        setMataProgram(null)
+        setAktivitas(null);
+        setPic(null);
+        setTanggalAwal(null);
+        setTanggalAkhir(null);
         setOpenModal("add")
-        loadSelect("standarRenstra");
-        loadSelect("indikator");
+        loadSelect("mataProgram");
     }
     function editHandler(data) {
         console.log(data)
         setId(data.id);
-        setTahun(data.tahun)
-        setStandarRenstra(data.standar_renstra?.id)
-        setIndikator(data.indikator)
-        setSubIndikator(data.parent)
-        setTipetarget(data.tipe_target)
-        setOperator(data.operator)
+        setMataProgram(data.id_mata_program)
+        setAktivitas(data.aktivitas);
+        setPic(data.PIC);
+        setTanggalAwal(data.target_rk_awal);
+        setTanggalAkhir(data.target_rk_akhir);
         setOpenModal("edit")
-        loadSelect("standarRenstra");
-        loadSelect("indikator");
+        loadSelect("mataProgram");
     }
     function deleteHandler(data) {
         setId(data.id);
-        setTahun(null)
-        setStandarRenstra(null)
-        setIndikator(data.indikator)
-        setSubIndikator(null)
-        setTipetarget(null)
-        setOperator(null)
+        setMataProgram(data.mata_program)
+        setAktivitas(null);
+        setPic(null);
+        setTanggalAwal(null);
+        setTanggalAkhir(null);
         setOpenModal("delete")
     }
     async function deleteProcess() {
         setLoadingModal(true);
         openModalDelete()
         try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.delete(`/api/master_indikator_renstra/${id}`);
+            console.log(`execute loadData to call /api/mata_program`);
+            const response = await apiProduction.delete(`/api/mata_program/${id}`);
 
             if (response.status === 200 || response.status === 204) {
                 toast.success('Berhasil disimpan!');
@@ -237,14 +168,15 @@ const Indikator = ({selected="",level}) => {
         setLoadingModal(true);
         openModalForm();
         try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.post("/api/master_indikator_renstra", {
-                tahun:tahun,
-                id_master_standar:standarRenstra,
-                indikator:indikator,
-                parent:subIndikator,
-                tipe_target:tipetarget,
-                operator:operator,
+            console.log(`execute loadData to call /api/aktivitas`);
+            const response = await apiProduction.post("/api/aktivitas", {
+                id_fakultas_unit:fakultas_unit,
+                id_mata_program:mataProgram,
+                aktivitas:aktivitas,
+                PIC:pic,
+                target_rk_awal:tanggalAwal,
+                target_rk_akhir:tanggalAkhir,
+                mata_program:mataProgram,
             });
 
             if (response.status === 200 || response.status === 204) {
@@ -269,14 +201,15 @@ const Indikator = ({selected="",level}) => {
         setLoadingModal(true);
         openModalForm();
         try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.put("/api/master_indikator_renstra", {
-                tahun:tahun,
-                id_master_standar:standarRenstra,
-                indikator:indikator,
-                parent:subIndikator,
-                tipe_target:tipetarget,
-                operator:operator,
+            console.log(`execute loadData to call /api/aktivitas`);
+            const response = await apiProduction.put("/api/aktivitas", {
+                id_fakultas_unit:fakultas_unit,
+                id_mata_program:mataProgram,
+                aktivitas:aktivitas,
+                PIC:pic,
+                target_rk_awal:tanggalAwal,
+                target_rk_akhir:tanggalAkhir,
+                mata_program:mataProgram,
                 id:id,
             });
 
@@ -354,11 +287,11 @@ const Indikator = ({selected="",level}) => {
 
     return <AdminPage selected={selected} level={level}>
         <div className="pagetitle">
-            <h1>Indikator Renstra</h1>
+            <h1>Aktivitas</h1>
             <nav>
                 <ol className="breadcrumb">
                     <li className="breadcrumb-item"><a href="#">Home</a></li>
-                    <li className="breadcrumb-item active">Indikator Renstra</li>
+                    <li className="breadcrumb-item active">Aktivitas</li>
                 </ol>
             </nav>
         </div>
@@ -371,11 +304,11 @@ const Indikator = ({selected="",level}) => {
                 {loading
                     ? "Loading..."
                     : (dataSource?.data ?? []).map(source => <Items idx={source?.id} 
-                                                                tahun={source?.tahun} 
-                                                                standarRenstra={source?.standar_renstra} 
-                                                                indikator={source?.indikator} 
-                                                                subIndikator={source?.sub_indikator} 
-                                                                tipeTarget={source?.tipe_target}
+                                                                mataProgram={source?.mata_program}
+                                                                aktivitas={source?.aktivitas}
+                                                                pic={source?.PIC}
+                                                                tanggalAwal={source?.target_rk_awal}
+                                                                tanggalAkhir={source?.target_rk_akhir}
                                                                 open={source?.open} 
                                                                 actionHandler={()=>actionHandler(source?.id)}
                                                                 editHandler={()=>editHandler(source)}
@@ -407,7 +340,7 @@ const Indikator = ({selected="",level}) => {
                         ></button>
                     </div>
                     <div className="modal-body">
-                        <h5 className="modal-title">Anda yakin ingin hapus data "{indikator}" ?</h5>
+                        <h5 className="modal-title">Anda yakin ingin hapus data "{mataProgram}" ?</h5>
                     </div>
                     <div className="modal-footer">
                         <button
@@ -442,43 +375,39 @@ const Indikator = ({selected="",level}) => {
                     </div>
                     <div className="modal-body">
                         <div className="mb-4">
-                            <Input
-                                label="Tahun"
-                                placeholder="Masukkan tahun"
-                                value={tahun}
-                                onChange={(e) => setTahun(e.target.value)}
-                            />
-
-                            <Select label={"Standar Renstra"} 
-                                        handlerChange={setStandarRenstra} 
-                                        items={listStandarRenstra} 
-                                        selected={standarRenstra} 
-                                        loading={loadingStandarRenstra}/>
+                            <Select label={"Mata Program"} 
+                                        handlerChange={setMataProgram} 
+                                        items={listMataProgram} 
+                                        selected={mataProgram} 
+                                        loading={loadingMataProgram}/>
 
                             <Input
-                                label="Indikator"
-                                placeholder="Masukkan indikator"
-                                value={indikator}
-                                onChange={(e) => setIndikator(e.target.value)}
+                                label="Aktivitas"
+                                placeholder="Masukkan aktivitas"
+                                value={aktivitas}
+                                onChange={(e) => setAktivitas(e.target.value)}
                             />
-                            
-                            <Select label={"Sub Indikator"} 
-                                        handlerChange={setSubIndikator} 
-                                        items={listSubIndikator} 
-                                        selected={subIndikator} 
-                                        loading={loadingSubIndikator}/>
 
-                            <Select label={"Tipe Target"} 
-                                        handlerChange={setTipetarget} 
-                                        items={listTipeTarget} 
-                                        selected={tipetarget}/>
+                            <Input
+                                label="PIC"
+                                placeholder="Masukkan pic"
+                                value={pic}
+                                onChange={(e) => setPic(e.target.value)}
+                            />
 
-                            {tipetarget=="range" && 
-                            <Select label={"Operator"} 
-                                        handlerChange={setOperator} 
-                                        items={listOperator} 
-                                        selected={operator}/>
-                            }
+                            <Input
+                                label="Target RK Awal"
+                                placeholder="Masukkan target RK awal"
+                                value={tanggalAwal}
+                                onChange={(e) => setTanggalAwal(e.target.value)}
+                            />
+
+                            <Input
+                                label="Target RK Akhir"
+                                placeholder="Masukkan target RK akhir"
+                                value={tanggalAkhir}
+                                onChange={(e) => setTanggalAkhir(e.target.value)}
+                            />
                         </div>
                     </div>
                     <div className="modal-footer">
@@ -491,27 +420,20 @@ const Indikator = ({selected="",level}) => {
         </div>
     </AdminPage>;
 };
-const Items = ({idx, tahun, standarRenstra, indikator, subIndikator, tipeTarget, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}}) => {
+const Items = ({idx, mataProgram, aktivitas, pic, tanggalAwal, tanggalAkhir, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}}) => {
     return <div key={idx} className="relative bg-white shadow-md rounded-lg p-4 border-l-4 border-green-500">
-                    <p className="text-sm font-semibold break-words mb-3 me-4">{indikator}</p>
-                    {
-                        subIndikator && 
-                        <div className="flex items-center text-purple-400">
-                            <BsListNested size={16} className="mr-2" />
-                            <span className="text-sm">{subIndikator?.indikator}</span>
-                        </div>
-                    }
+                    <p className="text-sm font-semibold break-words mb-3 me-4">{aktivitas}</p>
                     <div className="flex items-center text-purple-400">
-                        <IoText size={16} className="mr-2" />
-                        <span className="text-sm">{standarRenstra?.nama}</span>
+                        <MdAbc size={16} className="mr-2" />
+                        <span className="text-sm">{mataProgram}</span>
+                    </div>
+                    <div className="flex items-center text-purple-400">
+                        <BiUser size={16} className="mr-2" />
+                        <span className="text-sm">{pic}</span>
                     </div>
                     <div className="flex items-center text-purple-400">
                         <CiCalendarDate size={16} className="mr-2" />
-                        <span className="text-sm">{tahun}</span>
-                    </div>
-                    <div className="flex items-center text-purple-400">
-                        <VscSymbolOperator size={16} className="mr-2" />
-                        <span className="text-sm">{tipeTarget}</span>
+                        <span className="text-sm">{formatDate(tanggalAwal)} - {formatDate(tanggalAkhir)}</span>
                     </div>
                     <div className="absolute top-3 right-3">
                         <button className="p-2 rounded-full hover:bg-gray-200" onClick={actionHandler}>
@@ -527,4 +449,4 @@ const Items = ({idx, tahun, standarRenstra, indikator, subIndikator, tipeTarget,
                 </div>
 }
 
-export default Indikator;
+export default Aktivitas;

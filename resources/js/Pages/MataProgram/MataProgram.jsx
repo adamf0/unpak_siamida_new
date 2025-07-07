@@ -6,13 +6,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import Pagination from "@src/Components/Pagination ";
 import Select from "@src/Components/Select";
 import { CiCalendarDate } from "react-icons/ci";
-import { BsListNested, BsThreeDotsVertical } from "react-icons/bs";
-import { IoText } from "react-icons/io5";
-import { VscSymbolOperator } from "react-icons/vsc";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import Input from "@src/Components/Input";
 
-//[PR] masih bermaslaah pada modl jika berhasil add/update tidak dapat terpanggil lagi
-const Indikator = ({selected="",level}) => {
+//[PR] level & fakultas_unit belum di set value dari login
+const MataProgram = ({selected="",level,fakultas_unit=null}) => {
     const [id, setId] = useState(null);
     const [openModal, setOpenModal] = useState(null);
     const modalRef = useRef();
@@ -26,56 +24,16 @@ const Indikator = ({selected="",level}) => {
     const [dataSource, setDataSource] = useState([]);
 
     const [tahun, setTahun] = useState(null);
-    const [standarRenstra, setStandarRenstra] = useState(null);
-    const [indikator, setIndikator] = useState(null);
-    const [subIndikator, setSubIndikator] = useState(null);
-    const [tipetarget, setTipetarget] = useState(null);
-    const [operator, setOperator] = useState(null);
+    const [mataProgram, setMataProgram] = useState(null);
     
-    const [listStandarRenstra, setListStandarRenstra] = useState([]);
-    const [loadingStandarRenstra, setLoadingStandarRenstra] = useState(false);
-
-    const [listSubIndikator, setListSubIndikator] = useState([]);
-    const [loadingSubIndikator, setLoadingSubIndikator] = useState(false);
-
-    const listTipeTarget = [
-        {
-            id:"numerik",
-            text:"numerik",
-        },
-        {
-            id:"kategori",
-            text:"kategori",
-        },
-        {
-            id:"range",
-            text:"range",
-        },
-    ];
-    const listOperator = [
-        {
-            id:">",
-            text:">",
-        },
-        {
-            id:">=",
-            text:">=",
-        },
-        {
-            id:"<",
-            text:"<",
-        },
-        {
-            id:"<=",
-            text:"<=",
-        },
-    ];
+    const [listTahun, setListTahun] = useState([]);
+    const [loadingTahun, setLoadingTahun] = useState(false);
     
     async function loadData(){
         setLoading(true);
         try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.get(`/api/master_indikator_renstra?page=${page}`, {
+            console.log(`execute loadData to call /api/mata_program`);
+            const response = await apiProduction.get(`/api/mata_program?page=${page}`, {
                 filter: ""
             });
 
@@ -96,59 +54,35 @@ const Indikator = ({selected="",level}) => {
             const rawResponse = error.response?.data;
             console.error(rawResponse);
 
-            if(![200,204].includes(status) && rawResponse?.title!=="Indikator.EmptyData"){
+            if(![200,204].includes(status) && rawResponse?.title!=="MataProgram.EmptyData"){
                 alert(rawResponse?.description ?? "ada masalah pada aplikasi");
             }
         } finally {
             setLoading(false);
         }
     }
-    async function loadStandarRenstra(){
-        setLoadingStandarRenstra(true);
+    async function loadTahun(){
+        setLoadingTahun(true);
         try {
-            console.log(`execute loadData to call /api/master_standar_renstra`);
-            const response = await apiProduction.get(`/api/master_standar_renstra/list`, {
+            console.log(`execute loadData to call /api/master_tahun`);
+            const response = await apiProduction.get(`/api/master_tahun/list`, {
                 filter: ""
             });
 
             if (response.status === 200 || response.status === 204) {
                 const rawData = response?.data ?? {};
-                setListStandarRenstra(rawData);
+                setListTahun(rawData);
             }
         } catch (error) {
             const status = error.response?.status;
             const rawResponse = error.response?.data;
             console.error(rawResponse);
 
-            if(![200,204].includes(status) && rawResponse?.title!=="Indikator.EmptyData"){
-                alert(rawResponse?.description!=null? "data standar renstra kosong":"ada masalah saat mengambil data standar renstra");
+            if(![200,204].includes(status) && rawResponse?.title!=="MasterTahun.EmptyData"){
+                alert(rawResponse?.description!=null? "data tahun kosong":"ada masalah saat mengambil data tahun");
             }
         } finally {
-            setLoadingStandarRenstra(false);
-        }
-    }
-    async function loadIndikator(){
-        setLoadingSubIndikator(true);
-        try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.get(`/api/master_indikator_renstra/list`, {
-                filter: ""
-            });
-
-            if (response.status === 200 || response.status === 204) {
-                const rawData = response?.data ?? {};
-                setListSubIndikator(rawData);
-            }
-        } catch (error) {
-            const status = error.response?.status;
-            const rawResponse = error.response?.data;
-            console.error(rawResponse);
-
-            if(![200,204].includes(status) && rawResponse?.title!=="Indikator.EmptyData"){
-                alert(rawResponse?.description!=null? "data indikator kosong":"ada masalah saat mengambil data indikator");
-            }
-        } finally {
-            setLoadingSubIndikator(false);
+            setLoadingTahun(false);
         }
     }
     function actionHandler(id) {
@@ -164,56 +98,38 @@ const Indikator = ({selected="",level}) => {
     }
 
     function loadSelect(target=null){
-        if(target==="standarRenstra"){
-            setListStandarRenstra([]);
-            loadStandarRenstra();
-        }
-        if(target==="indikator"){
-            setListSubIndikator([]);
-            loadIndikator();
+        if(target==="tahun"){
+            setListTahun([]);
+            loadTahun();
         }
     }
     function addHandler() {
         setId(null);
         setTahun(null)
-        setStandarRenstra(null)
-        setIndikator(null)
-        setSubIndikator(null)
-        setTipetarget(null)
-        setOperator(null)
+        setMataProgram(null)
         setOpenModal("add")
-        loadSelect("standarRenstra");
-        loadSelect("indikator");
+        loadSelect("tahun");
     }
     function editHandler(data) {
         console.log(data)
         setId(data.id);
-        setTahun(data.tahun)
-        setStandarRenstra(data.standar_renstra?.id)
-        setIndikator(data.indikator)
-        setSubIndikator(data.parent)
-        setTipetarget(data.tipe_target)
-        setOperator(data.operator)
+        setTahun(data.m_tahun?.id)
+        setMataProgram(data.mata_program)
         setOpenModal("edit")
-        loadSelect("standarRenstra");
-        loadSelect("indikator");
+        loadSelect("tahun");
     }
     function deleteHandler(data) {
         setId(data.id);
         setTahun(null)
-        setStandarRenstra(null)
-        setIndikator(data.indikator)
-        setSubIndikator(null)
-        setTipetarget(null)
-        setOperator(null)
+        setMataProgram(data.mata_program)
         setOpenModal("delete")
     }
     async function deleteProcess() {
         setLoadingModal(true);
         openModalDelete()
         try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.delete(`/api/master_indikator_renstra/${id}`);
+            console.log(`execute loadData to call /api/mata_program`);
+            const response = await apiProduction.delete(`/api/mata_program/${id}`);
 
             if (response.status === 200 || response.status === 204) {
                 toast.success('Berhasil disimpan!');
@@ -237,14 +153,11 @@ const Indikator = ({selected="",level}) => {
         setLoadingModal(true);
         openModalForm();
         try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.post("/api/master_indikator_renstra", {
-                tahun:tahun,
-                id_master_standar:standarRenstra,
-                indikator:indikator,
-                parent:subIndikator,
-                tipe_target:tipetarget,
-                operator:operator,
+            console.log(`execute loadData to call /api/mata_program`);
+            const response = await apiProduction.post("/api/mata_program", {
+                id_master_tahun:tahun,
+                mata_program:mataProgram,
+                id_fakultas_unit:fakultas_unit
             });
 
             if (response.status === 200 || response.status === 204) {
@@ -269,14 +182,11 @@ const Indikator = ({selected="",level}) => {
         setLoadingModal(true);
         openModalForm();
         try {
-            console.log(`execute loadData to call /api/master_indikator_renstra`);
-            const response = await apiProduction.put("/api/master_indikator_renstra", {
-                tahun:tahun,
-                id_master_standar:standarRenstra,
-                indikator:indikator,
-                parent:subIndikator,
-                tipe_target:tipetarget,
-                operator:operator,
+            console.log(`execute loadData to call /api/mata_program`);
+            const response = await apiProduction.put("/api/mata_program", {
+                id_master_tahun:tahun,
+                mata_program:mataProgram,
+                id_fakultas_unit:fakultas_unit,
                 id:id,
             });
 
@@ -354,11 +264,11 @@ const Indikator = ({selected="",level}) => {
 
     return <AdminPage selected={selected} level={level}>
         <div className="pagetitle">
-            <h1>Indikator Renstra</h1>
+            <h1>Mata Program</h1>
             <nav>
                 <ol className="breadcrumb">
                     <li className="breadcrumb-item"><a href="#">Home</a></li>
-                    <li className="breadcrumb-item active">Indikator Renstra</li>
+                    <li className="breadcrumb-item active">Mata Program</li>
                 </ol>
             </nav>
         </div>
@@ -371,11 +281,8 @@ const Indikator = ({selected="",level}) => {
                 {loading
                     ? "Loading..."
                     : (dataSource?.data ?? []).map(source => <Items idx={source?.id} 
-                                                                tahun={source?.tahun} 
-                                                                standarRenstra={source?.standar_renstra} 
-                                                                indikator={source?.indikator} 
-                                                                subIndikator={source?.sub_indikator} 
-                                                                tipeTarget={source?.tipe_target}
+                                                                tahun={source?.m_tahun?.tahun} 
+                                                                mataProgram={source?.mata_program}
                                                                 open={source?.open} 
                                                                 actionHandler={()=>actionHandler(source?.id)}
                                                                 editHandler={()=>editHandler(source)}
@@ -407,7 +314,7 @@ const Indikator = ({selected="",level}) => {
                         ></button>
                     </div>
                     <div className="modal-body">
-                        <h5 className="modal-title">Anda yakin ingin hapus data "{indikator}" ?</h5>
+                        <h5 className="modal-title">Anda yakin ingin hapus data "{MataProgram}" ?</h5>
                     </div>
                     <div className="modal-footer">
                         <button
@@ -442,43 +349,18 @@ const Indikator = ({selected="",level}) => {
                     </div>
                     <div className="modal-body">
                         <div className="mb-4">
-                            <Input
-                                label="Tahun"
-                                placeholder="Masukkan tahun"
-                                value={tahun}
-                                onChange={(e) => setTahun(e.target.value)}
-                            />
-
-                            <Select label={"Standar Renstra"} 
-                                        handlerChange={setStandarRenstra} 
-                                        items={listStandarRenstra} 
-                                        selected={standarRenstra} 
-                                        loading={loadingStandarRenstra}/>
+                            <Select label={"Tahun"} 
+                                        handlerChange={setTahun} 
+                                        items={listTahun} 
+                                        selected={tahun} 
+                                        loading={loadingTahun}/>
 
                             <Input
-                                label="Indikator"
-                                placeholder="Masukkan indikator"
-                                value={indikator}
-                                onChange={(e) => setIndikator(e.target.value)}
+                                label="Mata Program"
+                                placeholder="Masukkan mata program"
+                                value={mataProgram}
+                                onChange={(e) => setMataProgram(e.target.value)}
                             />
-                            
-                            <Select label={"Sub Indikator"} 
-                                        handlerChange={setSubIndikator} 
-                                        items={listSubIndikator} 
-                                        selected={subIndikator} 
-                                        loading={loadingSubIndikator}/>
-
-                            <Select label={"Tipe Target"} 
-                                        handlerChange={setTipetarget} 
-                                        items={listTipeTarget} 
-                                        selected={tipetarget}/>
-
-                            {tipetarget=="range" && 
-                            <Select label={"Operator"} 
-                                        handlerChange={setOperator} 
-                                        items={listOperator} 
-                                        selected={operator}/>
-                            }
                         </div>
                     </div>
                     <div className="modal-footer">
@@ -491,27 +373,12 @@ const Indikator = ({selected="",level}) => {
         </div>
     </AdminPage>;
 };
-const Items = ({idx, tahun, standarRenstra, indikator, subIndikator, tipeTarget, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}}) => {
+const Items = ({idx, tahun, mataProgram, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}}) => {
     return <div key={idx} className="relative bg-white shadow-md rounded-lg p-4 border-l-4 border-green-500">
-                    <p className="text-sm font-semibold break-words mb-3 me-4">{indikator}</p>
-                    {
-                        subIndikator && 
-                        <div className="flex items-center text-purple-400">
-                            <BsListNested size={16} className="mr-2" />
-                            <span className="text-sm">{subIndikator?.indikator}</span>
-                        </div>
-                    }
-                    <div className="flex items-center text-purple-400">
-                        <IoText size={16} className="mr-2" />
-                        <span className="text-sm">{standarRenstra?.nama}</span>
-                    </div>
+                    <p className="text-sm font-semibold break-words mb-3 me-4">{mataProgram}</p>
                     <div className="flex items-center text-purple-400">
                         <CiCalendarDate size={16} className="mr-2" />
                         <span className="text-sm">{tahun}</span>
-                    </div>
-                    <div className="flex items-center text-purple-400">
-                        <VscSymbolOperator size={16} className="mr-2" />
-                        <span className="text-sm">{tipeTarget}</span>
                     </div>
                     <div className="absolute top-3 right-3">
                         <button className="p-2 rounded-full hover:bg-gray-200" onClick={actionHandler}>
@@ -527,4 +394,4 @@ const Items = ({idx, tahun, standarRenstra, indikator, subIndikator, tipeTarget,
                 </div>
 }
 
-export default Indikator;
+export default MataProgram;

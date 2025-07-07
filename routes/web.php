@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AktivitasController;
 use App\Http\Controllers\JenisFileRenstraController;
 use App\Http\Controllers\MasterIndikatorRenstraController;
 use App\Http\Controllers\MasterStandarRenstraController;
 use App\Http\Controllers\MasterTahunController;
+use App\Http\Controllers\MataProgramController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', [LoginController::class, 'index'])->name('login.index');
@@ -253,8 +255,16 @@ use Illuminate\Support\Facades\Route;
     //     Route::get('/laporan_renstra/{type}', [LaporanRenstraController::class, 'index'])->name('laporan_renstra');
     // });
 
-    // Route::middleware('role:Laporan Renstra,admin')->group(function () {
+    // Route::middleware('role:Master Tahun,admin')->group(function () {
         Route::get('/master_tahun', [MasterTahunController::class, 'index'])->name('master_tahun');
+    // });
+
+    // Route::middleware('role:Laporan Renstra,admin')->group(function () {
+        Route::get('/mata_program', [MataProgramController::class, 'index'])->name('mata_program');
+    // });
+
+    // Route::middleware('role:Aktivitas,admin')->group(function () {
+        Route::get('/aktivitas', [AktivitasController::class, 'index'])->name('aktivitas');
     // });
 // });
 

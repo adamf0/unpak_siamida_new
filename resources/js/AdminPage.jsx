@@ -74,16 +74,23 @@ const AdminPage = ({children, selected="", level=null}) => {
           {renderBukuPanduan()}
 
           <li className="nav-item">
-              <a className={classNames(`nav-link`, selected!="jenis_file_renstra"? `collapsed`:``)} href="/jenis_file_renstra">
-                  <i className="bi bi-card-checklist"></i>
-                  <span>Jenis File</span>
-              </a>
-          </li>
-          
-          <li className="nav-item">
               <a className={classNames(`nav-link`, selected!="penggunas"? `collapsed`:``)} href="/penggunas">
                   <i className="bi bi-person-fill"></i>
                   <span>Pengguna</span>
+              </a>
+          </li>
+
+          <li className="nav-item">
+              <a className={classNames(`nav-link`, selected!="master_tahun"? `collapsed`:``)} href="/master_tahun">
+                  <i className="bi bi-calendar"></i>
+                  <span>Master Tahun <small className="text-red-400">(Proker)</small></span>
+              </a>
+          </li>
+
+          <li className="nav-item">
+              <a className={classNames(`nav-link`, selected!="jenis_file_renstra"? `collapsed`:``)} href="/jenis_file_renstra">
+                  <i className="bi bi-tags-fill"></i>
+                  <span>Jenis File</span>
               </a>
           </li>
 
@@ -96,15 +103,24 @@ const AdminPage = ({children, selected="", level=null}) => {
 
           <li className="nav-item">
               <a className={classNames(`nav-link`, selected!="master_indikator_renstra"? `collapsed`:``)} href="/master_indikator_renstra">
-                  <i className="bi bi-card-checklist"></i>
+                  <i className="bi bi-list-check"></i>
                   <span>Indikator Renstra</span>
               </a>
           </li>
 
+          <li className="nav-heading">Data Proker</li>
+
           <li className="nav-item">
-              <a className={classNames(`nav-link`, selected!="master_tahun"? `collapsed`:``)} href="/master_tahun">
-                  <i className="bi bi-calendar"></i>
-                  <span>Master Tahun</span>
+              <a className={classNames(`nav-link`, selected!="mata_program"? `collapsed`:``)} href="/mata_program">
+                  <i className="bi bi-file-earmark-post"></i>
+                  <span>Mata Program</span>
+              </a>
+          </li>
+
+          <li className="nav-item">
+              <a className={classNames(`nav-link`, selected!="aktivitas"? `collapsed`:``)} href="/aktivitas">
+                  <i className="bi bi-activity"></i>
+                  <span>Aktivitas</span>
               </a>
           </li>
 
@@ -128,7 +144,7 @@ const AdminPage = ({children, selected="", level=null}) => {
 
           <li className="nav-item">
               <a className={classNames(`nav-link`, selected!="renstra"? `collapsed`:``)} href="/renstra">
-                  <i className="bi bi-file-earmark-x-fill"></i>
+                  <i className="bi bi-calendar4-range"></i>
                   <span>Scheduling</span>
               </a>
           </li>
@@ -171,6 +187,22 @@ const AdminPage = ({children, selected="", level=null}) => {
               <a className={classNames(`nav-link`, selected!="evaluasi_renstra"? `collapsed`:``)} href="/evaluasi_renstra">
                   <i className="bi bi-chat-quote"></i>
                   <span>Renstra</span>
+              </a>
+          </li>
+
+          <li className="nav-heading">Data Proker</li>
+
+          <li className="nav-item">
+              <a className={classNames(`nav-link`, selected!="mata_program"? `collapsed`:``)} href="/mata_program">
+                  <i className="bi bi-file-earmark-post"></i>
+                  <span>Mata Program</span>
+              </a>
+          </li>
+
+          <li className="nav-item">
+              <a className={classNames(`nav-link`, selected!="aktivitas"? `collapsed`:``)} href="/aktivitas">
+                  <i className="bi bi-activity"></i>
+                  <span>Aktivitas</span>
               </a>
           </li>
       </>
