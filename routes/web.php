@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\JenisFileRenstraController;
+use App\Http\Controllers\MasterIndikatorRenstraController;
 use App\Http\Controllers\MasterStandarRenstraController;
 use Illuminate\Support\Facades\Route;
 
@@ -186,7 +187,7 @@ use Illuminate\Support\Facades\Route;
     // });
 
     // Route::middleware('role:Master Indikator Renstra,admin')->group(function () {
-    //     Route::get('/master_indikator_renstra', [MasterIndikatorRenstraController::class, 'index'])->name('master_indikator_renstra');
+        Route::get('/master_indikator_renstra', [MasterIndikatorRenstraController::class, 'index'])->name('master_indikator_renstra');
     //     Route::get('/master_indikator_renstra/add', [MasterIndikatorRenstraController::class, 'create'])->name('master_indikator_renstra.create');
     //     Route::post('/master_indikator_renstra/store', [MasterIndikatorRenstraController::class, 'store'])->name('master_indikator_renstra.store');
     //     Route::get('/master_indikator_renstra/edit/{id}', [MasterIndikatorRenstraController::class, 'edit'])->name('master_indikator_renstra.edit');

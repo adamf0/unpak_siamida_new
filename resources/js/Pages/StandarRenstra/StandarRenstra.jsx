@@ -4,6 +4,8 @@ import { apiProduction } from "@src/Persistance/API";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from "@src/Components/Pagination ";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import Input from "@src/Components/Input";
 
 const StandarRenstra = ({selected="",level}) => {
     const [id, setId] = useState(null);
@@ -197,6 +199,9 @@ const StandarRenstra = ({selected="",level}) => {
         } else if (openModal === "add" || openModal === "edit") {
             modalDelete.hide();
             modal.show();
+        } else{
+            modalDelete.hide();
+            modal.hide();
         }
     }, [openModal]);
 
@@ -247,6 +252,7 @@ const StandarRenstra = ({selected="",level}) => {
                         data-bs-dismiss="modal"
                         aria-label="Close"
                         disabled={loadingModal}
+                        onClick={()=>setOpenModal(null)}
                         ></button>
                     </div>
                     <div className="modal-body">
@@ -280,20 +286,17 @@ const StandarRenstra = ({selected="",level}) => {
                         data-bs-dismiss="modal"
                         aria-label="Close"
                         disabled={loadingModal}
+                        onClick={()=>setOpenModal(null)}
                         ></button>
                     </div>
                     <div className="modal-body">
                         <div class="mb-4">
-                            <div class="w-full relative">
-                                <label class="block text-sm font-medium text-gray-900 mb-2">Standar Renstra</label>
-                                <div class="relative">
-                                    <input placeholder="Masukkan standar renstra" 
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-100 bg-gray-100 " 
-                                            type="text"
-                                            onChange={(e)=>setStandarRenstra(e.target.value)} 
-                                            value={standarRenstra}/>
-                                </div>
-                            </div>
+                            <Input
+                                label="Tahun"
+                                placeholder="Masukkan standar renstra"
+                                value={standarRenstra}
+                                onChange={(e) => setStandarRenstra(e.target.value)}
+                            />
                         </div>
                     </div>
                     <div className="modal-footer">
@@ -311,7 +314,7 @@ const Items = ({idx, title, open=false, actionHandler=()=>{}, deleteHandler=()=>
                     <p className="text-sm font-semibold break-words mb-3 me-4">{title}</p>
                     <div className="absolute top-3 right-3">
                         <button className="p-2 rounded-full hover:bg-gray-200" onClick={actionHandler}>
-                            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"></path></svg>
+                            <BsThreeDotsVertical  />
                         </button>
                         {open && <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border border-gray-200 rounded-md overflow-hidden z-50">
                             <ul className="!py-1 !px-1 mb-0">
