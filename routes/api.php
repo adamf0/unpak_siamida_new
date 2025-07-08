@@ -5,6 +5,7 @@ use App\Http\Controllers\ApiIndikatorController;
 use App\Http\Controllers\ApiJenisFileRenstraController;
 use App\Http\Controllers\ApiMasterTahunController;
 use App\Http\Controllers\ApiMataProgramController;
+use App\Http\Controllers\ApiPelaporanDokumenController;
 use App\Http\Controllers\ApiStandarRenstraController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,5 +46,12 @@ Route::get('/mata_program/{id}', [ApiMataProgramController::class, 'detail'])->n
 Route::get('/aktivitas', [ApiAktivitasController::class, 'index'])->name('api_aktivitas.index');
 Route::post('/aktivitas', [ApiAktivitasController::class, 'store'])->name('api_aktivitas.store');
 Route::put('/aktivitas', [ApiAktivitasController::class, 'update'])->name('api_aktivitas.update');
+Route::put('/aktivitas/pelaporan_dokumen', [ApiAktivitasController::class, 'updatePelaporanDokumen'])->name('api_aktivitas.updatePelaporanDokumen');
 Route::delete('/aktivitas/{id}', [ApiAktivitasController::class, 'destroy'])->name('api_aktivitas.destroy');
 Route::get('/aktivitas/{id}', [ApiAktivitasController::class, 'detail'])->name('api_aktivitas.detail');
+
+Route::get('/pelaporan_dokumen', [ApiPelaporanDokumenController::class, 'index'])->name('api_pelaporan_dokumen.index');
+Route::post('/pelaporan_dokumen', [ApiPelaporanDokumenController::class, 'store'])->name('api_pelaporan_dokumen.store');
+Route::put('/pelaporan_dokumen', [ApiPelaporanDokumenController::class, 'update'])->name('api_pelaporan_dokumen.update');
+Route::delete('/pelaporan_dokumen/{id}', [ApiPelaporanDokumenController::class, 'destroy'])->name('api_pelaporan_dokumen.destroy');
+Route::get('/pelaporan_dokumen/{id}', [ApiPelaporanDokumenController::class, 'detail'])->name('api_pelaporan_dokumen.detail');

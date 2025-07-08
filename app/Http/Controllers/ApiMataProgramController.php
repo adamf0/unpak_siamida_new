@@ -22,8 +22,12 @@ class ApiMataProgramController extends Controller
         $offset = ($page - 1) * $perPage;
 
         $datas = MataProgram::with("MTahun")->offset($offset)
-                    ->limit($perPage)
-                    ->get();
+                    ->limit($perPage);
+
+        if($request->get("level")=="auditee"){
+            $datas = $datas->where("id_fakultas_unit", $request->fakultas_unit);
+        }
+        $datas = $datas->get();
 
         if($datas->count()==0){
             return response()->json([

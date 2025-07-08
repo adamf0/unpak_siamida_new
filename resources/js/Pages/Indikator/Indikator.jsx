@@ -186,7 +186,6 @@ const Indikator = ({selected="",level}) => {
         loadSelect("indikator");
     }
     function editHandler(data) {
-        console.log(data)
         setId(data.id);
         setTahun(data.tahun)
         setStandarRenstra(data.standar_renstra?.id)
@@ -494,25 +493,27 @@ const Indikator = ({selected="",level}) => {
 const Items = ({idx, tahun, standarRenstra, indikator, subIndikator, tipeTarget, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}}) => {
     return <div key={idx} className="relative bg-white shadow-md rounded-lg p-4 border-l-4 border-green-500">
                     <p className="text-sm font-semibold break-words mb-3 me-4">{indikator}</p>
-                    {
-                        subIndikator && 
-                        <div className="flex items-center text-purple-400">
-                            <BsListNested size={16} className="mr-2" />
-                            <span className="text-sm">{subIndikator?.indikator}</span>
-                        </div>
-                    }
-                    <div className="flex items-center text-purple-400">
-                        <IoText size={16} className="mr-2" />
-                        <span className="text-sm">{standarRenstra?.nama}</span>
-                    </div>
-                    <div className="flex items-center text-purple-400">
-                        <CiCalendarDate size={16} className="mr-2" />
-                        <span className="text-sm">{tahun}</span>
-                    </div>
-                    <div className="flex items-center text-purple-400">
-                        <VscSymbolOperator size={16} className="mr-2" />
-                        <span className="text-sm">{tipeTarget}</span>
-                    </div>
+                    <table className="text-sm w-full table-fixed">
+                        {
+                            subIndikator &&
+                            <tr>
+                                <td className="w-28 align-top" width={100}>Indikator</td>
+                                <td class="break-words">: {subIndikator?.indikator}</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td className="w-28 align-top" width={100}>Standar Renstra</td>
+                            <td class="break-words">: {standarRenstra?.nama}</td>
+                        </tr>
+                        <tr>
+                            <td className="w-28 align-top" width={100}>Tahun</td>
+                            <td class="break-words">: {tahun}</td>
+                        </tr>
+                        <tr>
+                            <td className="w-28 align-top" width={100}>Tipe Target</td>
+                            <td class="break-words">: {tipeTarget}</td>
+                        </tr>
+                    </table>
                     <div className="absolute top-3 right-3">
                         <button className="p-2 rounded-full hover:bg-gray-200" onClick={actionHandler}>
                             <BsThreeDotsVertical  />

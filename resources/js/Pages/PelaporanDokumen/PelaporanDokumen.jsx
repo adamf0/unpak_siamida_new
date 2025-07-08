@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import AdminPage from "@src/AdminPage";
-import { apiProduction } from "@src/Persistance/API";
+import { apiProduction, baseUrl } from "@src/Persistance/API";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from "@src/Components/Pagination ";
 import Select from "@src/Components/Select";
 import { CiCalendarDate } from "react-icons/ci";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import Input from "@src/Components/Input";
+import RadioGroup from "@src/Components/RadioGroup";
 
 //[PR] level & fakultas_unit belum di set value dari login
-const MataProgram = ({selected="",level,fakultas_unit=null}) => {
+const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
     const [id, setId] = useState(null);
     const [openModal, setOpenModal] = useState(null);
     const modalRef = useRef();
@@ -23,17 +23,20 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
     const [page, setPage] = useState(1);
     const [dataSource, setDataSource] = useState([]);
 
-    const [tahun, setTahun] = useState(null);
+    const [jenisDokumen, setJenisDokumen] = useState(null);
     const [mataProgram, setMataProgram] = useState(null);
+    const fileRef = useRef(null);
+    const [file, setFile] = useState(null);
+    const [filePreview, setFilePreview] = useState(null);
     
-    const [listTahun, setListTahun] = useState([]);
-    const [loadingTahun, setLoadingTahun] = useState(false);
+    const [listMataProgram, setListMataProgram] = useState([]);
+    const [loadingMataProgram, setLoadingMataProgram] = useState(false);
     
     async function loadData(){
         setLoading(true);
         try {
-            console.log(`execute loadData to call /api/mata_program`);
-            const response = await apiProduction.get(`/api/mata_program`, {
+            console.log(`execute loadData to call /api/pelaporan_dokumen`);
+            const response = await apiProduction.get(`/api/pelaporan_dokumen`, {
                 params: {
                     page:page,
                     filter: "",
@@ -59,35 +62,35 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
             const rawResponse = error.response?.data;
             console.error(rawResponse);
 
-            if(![200,204].includes(status) && rawResponse?.title!=="MataProgram.EmptyData"){
+            if(![200,204].includes(status) && rawResponse?.title!=="PelaporanPelaksanaan.EmptyData"){
                 alert(rawResponse?.description ?? "ada masalah pada aplikasi");
             }
         } finally {
             setLoading(false);
         }
     }
-    async function loadTahun(){
-        setLoadingTahun(true);
+    async function loadMataProgram(){
+        setLoadingMataProgram(true);
         try {
-            console.log(`execute loadData to call /api/master_tahun`);
-            const response = await apiProduction.get(`/api/master_tahun/list`, {
+            console.log(`execute loadData to call /api/mata_program`);
+            const response = await apiProduction.get(`/api/mata_program/list`, {
                 filter: ""
             });
 
             if (response.status === 200 || response.status === 204) {
                 const rawData = response?.data ?? {};
-                setListTahun(rawData);
+                setListMataProgram(rawData);
             }
         } catch (error) {
             const status = error.response?.status;
             const rawResponse = error.response?.data;
             console.error(rawResponse);
 
-            if(![200,204].includes(status) && rawResponse?.title!=="MasterTahun.EmptyData"){
+            if(![200,204].includes(status) && rawResponse?.title!=="MataProgram.EmptyData"){
                 alert(rawResponse?.description!=null? "data tahun kosong":"ada masalah saat mengambil data tahun");
             }
         } finally {
-            setLoadingTahun(false);
+            setLoadingMataProgram(false);
         }
     }
     function actionHandler(id) {
@@ -103,29 +106,29 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
     }
 
     function loadSelect(target=null){
-        if(target==="tahun"){
-            setListTahun([]);
-            loadTahun();
+        if(target==="mataProgram"){
+            setListMataProgram([]);
+            loadMataProgram();
         }
     }
     function addHandler() {
         setId(null);
-        setTahun(null)
+        setFile(null)
         setMataProgram(null)
+        setJenisDokumen(null)
         setOpenModal("add")
-        loadSelect("tahun");
+        loadSelect("mataProgram");
     }
     function editHandler(data) {
         setId(data.id);
-        setTahun(data.m_tahun?.id)
-        setMataProgram(data.mata_program)
+        setFile(data.file)
+        setMataProgram(data.id_mata_program)
+        setJenisDokumen(data.jenis_dokumen)
         setOpenModal("edit")
-        loadSelect("tahun");
+        loadSelect("mataProgram");
     }
     function deleteHandler(data) {
         setId(data.id);
-        setTahun(null)
-        setMataProgram(data.mata_program)
         setOpenModal("delete")
     }
     async function deleteProcess() {
@@ -157,11 +160,17 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
         setLoadingModal(true);
         openModalForm();
         try {
-            console.log(`execute loadData to call /api/mata_program`);
-            const response = await apiProduction.post("/api/mata_program", {
-                id_master_tahun:tahun,
-                mata_program:mataProgram,
-                id_fakultas_unit:fakultas_unit
+            let formData = new FormData();
+            formData.append("id_mata_program", mataProgram==null? "":mataProgram)
+            formData.append("jenis_dokumen", jenisDokumen==null? "":jenisDokumen)
+            formData.append("file", file)
+            formData.append("id_fakultas_unit", fakultas_unit==null? "":fakultas_unit)
+
+            console.log(`execute loadData to call /api/pelaporan_dokumen`);
+            const response = await apiProduction.post("/api/pelaporan_dokumen", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
             });
 
             if (response.status === 200 || response.status === 204) {
@@ -186,12 +195,21 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
         setLoadingModal(true);
         openModalForm();
         try {
-            console.log(`execute loadData to call /api/mata_program`);
-            const response = await apiProduction.put("/api/mata_program", {
-                id_master_tahun:tahun,
-                mata_program:mataProgram,
-                id_fakultas_unit:fakultas_unit,
-                id:id,
+            let formData = new FormData();
+            formData.append("id_mata_program", mataProgram==null? "":mataProgram)
+            formData.append("jenis_dokumen", jenisDokumen==null? "":jenisDokumen)
+            if(filePreview!=null){
+                formData.append("file", file)
+            }
+            formData.append("id_fakultas_unit", fakultas_unit==null? "":fakultas_unit)
+            formData.append("id", id)
+            formData.append('_method', 'PUT');
+
+            console.log(`execute loadData to call /api/pelaporan_dokumen`);
+            const response = await apiProduction.post("/api/pelaporan_dokumen", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
             });
 
             if (response.status === 200 || response.status === 204) {
@@ -210,6 +228,25 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
         } finally {
             setLoadingModal(false);
             closeModalForm();
+        }
+    }
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setFile(file);
+            setFilePreview(file?.name ?? "");
+            // setErrListBerkasTambahan(prev => {
+            //     const { file, ...rest } = prev;
+            //     return rest;
+            // });
+        }
+    };
+
+    const handlerResetFile = () => {
+        setFile(null);
+        setFilePreview(null);
+        if (fileRef.current) {
+            fileRef.current.value = "";
         }
     }
     
@@ -265,14 +302,13 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
         }
     }, [openModal]);
 
-
     return <AdminPage selected={selected} level={level}>
         <div className="pagetitle">
-            <h1>Mata Program</h1>
+            <h1>Pelaporan Dokumen</h1>
             <nav>
                 <ol className="breadcrumb">
                     <li className="breadcrumb-item"><a href="#">Home</a></li>
-                    <li className="breadcrumb-item active">Mata Program</li>
+                    <li className="breadcrumb-item active">Pelaporan Dokumen</li>
                 </ol>
             </nav>
         </div>
@@ -288,8 +324,9 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
                 {loading
                     ? "Loading..."
                     : (dataSource?.data ?? []).map(source => <Items idx={source?.id} 
-                                                                tahun={source?.m_tahun?.tahun} 
-                                                                mataProgram={source?.mata_program}
+                                                                mataProgram={source?.m_mata_program?.mata_program} 
+                                                                jenisDokumen={source?.jenis_dokumen}
+                                                                file={source?.file}
                                                                 open={source?.open} 
                                                                 actionHandler={()=>actionHandler(source?.id)}
                                                                 editHandler={()=>editHandler(source)}
@@ -322,7 +359,7 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
                         ></button>
                     </div>
                     <div className="modal-body">
-                        <h5 className="modal-title">Anda yakin ingin hapus data "{MataProgram}" ?</h5>
+                        <h5 className="modal-title">Anda yakin ingin hapus data ini?</h5>
                     </div>
                     <div className="modal-footer">
                         <button
@@ -357,18 +394,86 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
                     </div>
                     <div className="modal-body">
                         <div className="mb-4">
-                            <Select label={"Tahun"} 
-                                        handlerChange={setTahun} 
-                                        items={listTahun} 
-                                        selected={tahun} 
-                                        loading={loadingTahun}/>
+                            <Select label={"Mata Program"} 
+                                        handlerChange={setMataProgram} 
+                                        items={listMataProgram} 
+                                        selected={mataProgram} 
+                                        loading={loadingMataProgram}/>
 
-                            <Input
-                                label="Mata Program"
-                                placeholder="Masukkan mata program"
-                                value={mataProgram}
-                                onChange={(e) => setMataProgram(e.target.value)}
-                            />
+                            <RadioGroup
+                                label="Jenis Dokumen"
+                                items={[
+                                    {
+                                    id: "sk",
+                                    text: "SK",
+                                    },
+                                    {
+                                    id: "sop",
+                                    text: "SOP",
+                                    },
+                                    {
+                                    id: "proposal_tor",
+                                    text: "Proposal/TOR",
+                                    },
+                                    {
+                                    id: "laporan",
+                                    text: "Laporan",
+                                    },
+                                    {
+                                    id: "dokumen_pendukung",
+                                    text: "Dokumen Pendukung",
+                                    },
+                                ]}
+                                selected={jenisDokumen}
+                                handlerChange={setJenisDokumen}
+                                />
+
+                            <div className="w-full relative">
+                                <label className="block text-sm font-medium text-gray-900 mb-2">
+                                    File
+                                </label>
+                                <div className="flex flex-col space-y-2">
+                                    <input
+                                        ref={fileRef}
+                                        type="file"
+                                        onChange={handleFileChange}
+                                        accept="application/pdf"
+                                        className={`w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white`}
+                                    />
+                                    <label className="block text-sm font-medium text-red-500 mb-2">Catatan:</label>
+                                    <ol className="list-decimal pl-10">
+                                        <li>ektensi file yang diterima <b>.PDF</b></li>  
+                                        <li>ukuran file yang di upload maksimal <b>5MB</b></li> 
+                                    </ol>
+                                    {file && (
+                                        <div className="bg-purple-50 border border-purple-400 rounded text-purple-800 text-sm p-2 flex justify-between">
+                                            <div>
+                                                <div className="flex items-center">
+                                                    <a target="_blank" href={filePreview==null? `/pelaporan_pelaksanaan/?`.replace("?",file):"#"}>
+                                                        {filePreview==null? file:filePreview}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <button onClick={handlerResetFile}>
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-6 w-6"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12"
+                                                />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div className="modal-footer">
@@ -381,13 +486,36 @@ const MataProgram = ({selected="",level,fakultas_unit=null}) => {
         </div>
     </AdminPage>;
 };
-const Items = ({idx, tahun, mataProgram, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}}, level) => {
+const renderJenisDokumen = (jenisDokumen) => {
+    let output = null;
+    if(jenisDokumen=="sk"){
+        output = "SK";
+    } else if(jenisDokumen=="sop"){
+        output = "SOP";
+    } else if(jenisDokumen=="proposal_tor"){
+        output = "Proposal/TOR";
+    } else if(jenisDokumen=="laporan"){
+        output = "Laporan";
+    } else if(jenisDokumen=="dokumen_pendukung"){
+        output = "Dokumen Pendukung";
+    }
+    return <span className="inline-block px-2 py-0.5 text-xs font-medium bg-green-700 text-white rounded-full">
+        {output}
+    </span>
+}
+const Items = ({idx, mataProgram, jenisDokumen, file=null, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}, level}) => {
     return <div key={idx} className="relative bg-white shadow-md rounded-lg p-4 border-l-4 border-green-500">
                     <p className="text-sm font-semibold break-words mb-3 me-4">{mataProgram}</p>
-                    <div className="flex items-center text-purple-400">
-                        <CiCalendarDate size={16} className="mr-2" />
-                        <span className="text-sm">{tahun}</span>
-                    </div>
+                    <table className="text-sm w-full table-fixed">
+                        <tr>
+                            <td className="w-28 align-top" width={100}>Jenis Dokumen</td>
+                            <td class="break-words">: {renderJenisDokumen(jenisDokumen)}</td>
+                        </tr>
+                        <tr>
+                            <td className="w-28 align-top" width={100}>File</td>
+                            <td class="break-words">: <a href={file==null? "#":`${baseUrl}/pelaporan_dokumen/${file}`} target="_blank">Klik disini</a></td>
+                        </tr>
+                    </table>
                     {
                         ["auditee"].includes(level) && 
                         <div className="absolute top-3 right-3">
@@ -405,4 +533,4 @@ const Items = ({idx, tahun, mataProgram, open=false, actionHandler=()=>{}, delet
                 </div>
 }
 
-export default MataProgram;
+export default PelaporanDokumen;

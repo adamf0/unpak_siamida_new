@@ -124,6 +124,20 @@ const AdminPage = ({children, selected="", level=null}) => {
               </a>
           </li>
 
+          <li className="nav-item">
+              <a className={classNames(`nav-link`, selected!="pelaporan_pelaksanaan"? `collapsed`:``)} href="/pelaporan_pelaksanaan">
+                  <i className="bi bi-activity"></i>
+                  <span>Pelaporan Pelaksanaan</span>
+              </a>
+          </li>
+
+          <li className="nav-item">
+              <a className={classNames(`nav-link`, selected!="pelaporan_dokumen"? `collapsed`:``)} href="/pelaporan_dokumen">
+                  <i className="bi bi-activity"></i>
+                  <span>Pelaporan Dokumen</span>
+              </a>
+          </li>
+
           <li className="nav-heading">Data Template</li>
 
           <li className="nav-item">
@@ -203,6 +217,13 @@ const AdminPage = ({children, selected="", level=null}) => {
               <a className={classNames(`nav-link`, selected!="aktivitas"? `collapsed`:``)} href="/aktivitas">
                   <i className="bi bi-activity"></i>
                   <span>Aktivitas</span>
+              </a>
+          </li>
+
+          <li className="nav-item">
+              <a className={classNames(`nav-link`, selected!="pelaporan_pelaksanaan"? `collapsed`:``)} href="/pelaporan_pelaksanaan">
+                  <i className="bi bi-activity"></i>
+                  <span>Pelaporan Pelaksanaan</span>
               </a>
           </li>
       </>

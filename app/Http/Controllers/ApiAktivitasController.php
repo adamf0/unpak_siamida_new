@@ -25,8 +25,12 @@ class ApiAktivitasController extends Controller
                     ->leftJoin("mata_program", "aktivitas.id_mata_program","=","aktivitas.id")
                     ->leftJoin("master_tahun", "mata_program.id_master_tahun","=","master_tahun.id")
                     ->offset($offset)
-                    ->limit($perPage)
-                    ->get();
+                    ->limit($perPage);
+
+        if($request->get("level")=="auditee"){
+            $datas = $datas->where("aktivitas.id_fakultas_unit", $request->fakultas_unit);
+        }
+        $datas = $datas->get();
 
         if($datas->count()==0){
             return response()->json([
@@ -114,14 +118,61 @@ class ApiAktivitasController extends Controller
             //     return redirect()->route('jenis_file_renstra.edit')->withInput()->withErrors($validator->errors());
             // }
 
-            $Aktivitas                          = Aktivitas::findOrFail($request->id);
-            $Aktivitas->id_fakultas_unit        = $request->id_fakultas_unit;
+            $Aktivitas                          = Aktivitas::find($request->id);
+            if($Aktivitas==null){
+                return response()->json([
+                    "title"=>"Aktivitas.notFound",
+                    "description"=>"data tidak ditemukan",
+                ], 400);
+            }
+            if($Aktivitas->id_fakultas_unit!=$request->id_fakultas_unit){
+                return response()->json([
+                    "title"=>"Aktivitas.invalidRequest",
+                    "description"=>"request tidak diterima",
+                ], 400);
+            }
             $Aktivitas->id_mata_program         = $request->id_mata_program;
             $Aktivitas->aktivitas               = $request->aktivitas;
             $Aktivitas->PIC                     = $request->PIC;
             $Aktivitas->target_rk_awal          = $request->target_rk_awal;
             $Aktivitas->target_rk_akhir         = $request->target_rk_akhir;
-            $Aktivitas->id_fakultas_unit        = $request->id_fakultas_unit;
+            $Aktivitas->save();
+
+            return response()->noContent();
+        } catch (Exception $e) {
+           return response()->json([
+                "title"=>"Aktivitas.error",
+                "description"=>$e->getMessage(),
+            ], 400);
+        }
+    }
+
+    public function updatePelaporanDokumen(Request $request) //done
+    {
+        try {
+            // $validator          = validator($request->all(), AktivitasReq::update());
+
+            // if (count($validator->errors())) {
+            //     return redirect()->route('jenis_file_renstra.edit')->withInput()->withErrors($validator->errors());
+            // }
+
+            $Aktivitas                          = Aktivitas::find($request->id);
+            if($Aktivitas==null){
+                return response()->json([
+                    "title"=>"Aktivitas.notFound",
+                    "description"=>"data tidak ditemukan",
+                ], 400);
+            }
+            if($Aktivitas->id_fakultas_unit!=$request->id_fakultas_unit){
+                return response()->json([
+                    "title"=>"Aktivitas.invalidRequest",
+                    "description"=>"request tidak diterima",
+                ], 400);
+            }
+            $Aktivitas->status_realisasi       = $request->status_realisasi;
+            $Aktivitas->target_r_awal          = $request->target_r_awal;
+            $Aktivitas->target_r_akhir         = $request->target_r_akhir;
+            $Aktivitas->detail                 = $request->detail;
             $Aktivitas->save();
 
             return response()->noContent();

@@ -6,6 +6,8 @@ use App\Http\Controllers\MasterIndikatorRenstraController;
 use App\Http\Controllers\MasterStandarRenstraController;
 use App\Http\Controllers\MasterTahunController;
 use App\Http\Controllers\MataProgramController;
+use App\Http\Controllers\PelaporanDokumenController;
+use App\Http\Controllers\PelaporanPelaksanaanController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', [LoginController::class, 'index'])->name('login.index');
@@ -265,6 +267,14 @@ use Illuminate\Support\Facades\Route;
 
     // Route::middleware('role:Aktivitas,admin')->group(function () {
         Route::get('/aktivitas', [AktivitasController::class, 'index'])->name('aktivitas');
+    // });
+
+    // Route::middleware('role:Aktivitas,admin')->group(function () {
+        Route::get('/pelaporan_dokumen', [PelaporanDokumenController::class, 'index'])->name('pelaporan_dokumen');
+    // });
+
+    // Route::middleware('role:Aktivitas,admin')->group(function () {
+        Route::get('/pelaporan_pelaksanaan', [PelaporanPelaksanaanController::class, 'index'])->name('pelaporan_pelaksanaan');
     // });
 // });
 
