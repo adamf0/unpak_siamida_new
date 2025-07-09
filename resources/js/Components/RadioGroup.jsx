@@ -16,11 +16,12 @@ const RadioGroup = ({
         {items.map((option) => (
           <label
             key={option.id}
+            onClick={() => !disabled && handlerChange(option.id)}
             className={`flex items-center space-x-3 cursor-pointer p-2 border rounded-lg transition ${
               selected === option.id
                 ? "bg-blue-100 border-blue-500"
                 : "border-gray-300 hover:bg-gray-50"
-            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            } ${disabled ? "opacity-80 cursor-not-allowed" : ""}`}
           >
             <input
               type="radio"
@@ -29,7 +30,7 @@ const RadioGroup = ({
               checked={selected === option.id}
               onChange={() => !disabled && handlerChange(option.id)}
               className="form-radio text-blue-600"
-              disabled={disabled}
+              // disabled={disabled}
             />
             <span className="text-sm font-medium text-gray-700">
               {option.text}

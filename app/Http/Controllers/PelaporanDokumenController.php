@@ -10,7 +10,7 @@ class PelaporanDokumenController extends Controller
     public function __construct(public $level = null)
     {
         // $level = Session::get("level");
-        $this->level = "auditee";
+        $this->level = "admin";
     }
     public function index(Request $request) //done
     {

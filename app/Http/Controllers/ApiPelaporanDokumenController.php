@@ -169,6 +169,37 @@ class ApiPelaporanDokumenController extends Controller
         }
     }
 
+    public function verifikasi(Request $request) //done
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                "id" => ["required"],
+                // "id_fakultas_unit" => ["required"],
+                "status" => ["required"],
+                "catatan" => ["required"]
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    "title" => "PelaporanPelaksanaan.invalidValidation",
+                    "description" => $validator->errors(),
+                ], 500);
+            }
+
+            $PelaporanPelaksanaan                           = PelaporanPelaksanaan::findOrFail($request->id);
+            $PelaporanPelaksanaan->status_verifikasi        = $request->status;
+            $PelaporanPelaksanaan->catatan                  = $request->catatan=="terverifikasi"? null:$request->catatan;
+            $PelaporanPelaksanaan->save();
+
+            return response()->noContent();
+        } catch (Exception $e) {
+           return response()->json([
+                "title"=>"PelaporanPelaksanaan.error",
+                "description"=>$e->getMessage(),
+            ], 400);
+        }
+    }
+
     public function destroy($id) //done
     {
         try {

@@ -5,7 +5,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from "@src/Components/Pagination ";
 import Select from "@src/Components/Select";
-import { CiCalendarDate } from "react-icons/ci";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import RadioGroup from "@src/Components/RadioGroup";
 
@@ -28,6 +27,8 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
     const fileRef = useRef(null);
     const [file, setFile] = useState(null);
     const [filePreview, setFilePreview] = useState(null);
+    const [statusVerifikasi, setStatusVerifikasi] = useState(null);
+    const [catatan, setCatatan] = useState(null);
     
     const [listMataProgram, setListMataProgram] = useState([]);
     const [loadingMataProgram, setLoadingMataProgram] = useState(false);
@@ -116,6 +117,8 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
         setFile(null)
         setMataProgram(null)
         setJenisDokumen(null)
+        setStatusVerifikasi(null)
+        setCatatan(null)
         setOpenModal("add")
         loadSelect("mataProgram");
     }
@@ -124,8 +127,30 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
         setFile(data.file)
         setMataProgram(data.id_mata_program)
         setJenisDokumen(data.jenis_dokumen)
+        setStatusVerifikasi(null)
+        setCatatan(null)
         setOpenModal("edit")
         loadSelect("mataProgram");
+    }
+    function verifikasiHandler(data) {
+        setId(data.id);
+        setFile(data.file)
+        setMataProgram(data.id_mata_program)
+        setJenisDokumen(data.jenis_dokumen)
+        setStatusVerifikasi(data.status)
+        setCatatan(data.catatan)
+        setOpenModal("verifikasi")
+        loadSelect("mataProgram");
+    }
+    function detailHandler(event,data) {
+        event.preventDefault();
+        setId(null);
+        setFile(null)
+        setMataProgram(data.id_mata_program)
+        setJenisDokumen(data.jenis_dokumen)
+        setStatusVerifikasi(null)
+        setCatatan(data.catatan)
+        setOpenModal("detail")
     }
     function deleteHandler(data) {
         setId(data.id);
@@ -230,6 +255,35 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
             closeModalForm();
         }
     }
+    async function verifikasiProcess() {
+        setLoadingModal(true);
+        openModalForm();
+        try {
+            console.log(`execute loadData to call /api/pelaporan_dokumen/verifikasi`);
+            const response = await apiProduction.put("/api/pelaporan_dokumen/verifikasi", {
+                status:statusVerifikasi,
+                catatan:catatan,
+                id:id
+            });
+
+            if (response.status === 200 || response.status === 204) {
+                toast.success('Berhasil diupdate!');
+                setPage(1)
+                loadData()
+            }
+        } catch (error) {
+            // console.error(error.response?.data)
+            const status = error.response?.status;
+            const detail =
+                error.response?.description ?? "ada masalah pada aplikasi";
+
+            toast.error(detail);
+            console.error(detail);
+        } finally {
+            setLoadingModal(false);
+            closeModalForm();
+        }
+    }
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -290,10 +344,10 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
 
         if (!modal || !modalDelete) return;
 
-        if (openModal === "delete") {
+        if (openModal === "delete" || openModal === "detail") {
             modal.hide();
             modalDelete.show();
-        } else if (openModal === "add" || openModal === "edit") {
+        } else if (openModal === "add" || openModal === "edit" || openModal === "verifikasi") {
             modalDelete.hide();
             modal.show();
         } else{
@@ -327,10 +381,14 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
                                                                 mataProgram={source?.m_mata_program?.mata_program} 
                                                                 jenisDokumen={source?.jenis_dokumen}
                                                                 file={source?.file}
+                                                                status_verifikasi={source?.status_verifikasi}
+                                                                catatan={source?.catatan}
                                                                 open={source?.open} 
                                                                 actionHandler={()=>actionHandler(source?.id)}
                                                                 editHandler={()=>editHandler(source)}
                                                                 deleteHandler={()=>deleteHandler(source)}
+                                                                verifikasiHandler={()=>verifikasiHandler(source)}
+                                                                detailHandler={(event)=>detailHandler(event,source)}
                                                                 level={level}
                                                                 />)
                 }
@@ -348,7 +406,16 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">Konfirmasi</h5>
+                        <h5 className="modal-title">
+                            {openModal==="detail"? 
+                                <>
+                                    <b>{mataProgram}</b>
+                                    <br/>
+                                    {jenisDokumen}
+                                </>:
+                                "Konfirmasi"
+                            }
+                        </h5>
                         <button
                         type="button"
                         className="btn-close"
@@ -359,7 +426,8 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
                         ></button>
                     </div>
                     <div className="modal-body">
-                        <h5 className="modal-title">Anda yakin ingin hapus data ini?</h5>
+                        {openModal==="detail" && <b>Catatan:</b>}
+                        <h5 className={`modal-title w-full ${openModal!=="detail" && "text-center"}`}>{openModal==="detail"? catatan:"Anda yakin ingin hapus data ini?"}</h5>
                     </div>
                     <div className="modal-footer">
                         <button
@@ -368,11 +436,13 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
                             data-bs-dismiss="modal"
                             disabled={loadingModal}
                         >
-                            Tidak
+                            {openModal==="detail"? "Tutup":"Tidak"}
                         </button>
-                        <button type="button" className="btn btn-success" disabled={loadingModal} onClick={()=>deleteProcess()}>
-                            Ya
-                        </button>
+                        {openModal!=="detail" && 
+                            <button type="button" className="btn btn-success" disabled={loadingModal} onClick={()=>deleteProcess()}>
+                                Ya
+                            </button>
+                        }
                     </div>
                 </div>
             </div>
@@ -382,7 +452,7 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">{openModal=="add"? "Tambah":"Edit"}</h5>
+                        <h5 className="modal-title">{openModal=="add"? "Tambah":openModal=="edit"? "Edit":"Verifikasi"}</h5>
                         <button
                         type="button"
                         className="btn-close"
@@ -398,6 +468,7 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
                                         handlerChange={setMataProgram} 
                                         items={listMataProgram} 
                                         selected={mataProgram} 
+                                        disabled={openModal=="verifikasi"}
                                         loading={loadingMataProgram}/>
 
                             <RadioGroup
@@ -425,59 +496,107 @@ const PelaporanDokumen = ({selected="",level,fakultas_unit=null}) => {
                                     },
                                 ]}
                                 selected={jenisDokumen}
+                                disabled={openModal=="verifikasi"}
                                 handlerChange={setJenisDokumen}
                                 />
 
                             <div className="w-full relative">
-                                <label className="block text-sm font-medium text-gray-900 mb-2">
-                                    File
-                                </label>
-                                <div className="flex flex-col space-y-2">
-                                    <input
-                                        ref={fileRef}
-                                        type="file"
-                                        onChange={handleFileChange}
-                                        accept="application/pdf"
-                                        className={`w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white`}
-                                    />
-                                    <label className="block text-sm font-medium text-red-500 mb-2">Catatan:</label>
-                                    <ol className="list-decimal pl-10">
-                                        <li>ektensi file yang diterima <b>.PDF</b></li>  
-                                        <li>ukuran file yang di upload maksimal <b>5MB</b></li> 
-                                    </ol>
-                                    {file && (
-                                        <div className="bg-purple-50 border border-purple-400 rounded text-purple-800 text-sm p-2 flex justify-between">
-                                            <div>
-                                                <div className="flex items-center">
-                                                    <a target="_blank" href={filePreview==null? `/pelaporan_pelaksanaan/?`.replace("?",file):"#"}>
-                                                        {filePreview==null? file:filePreview}
-                                                    </a>
+                                {
+                                    openModal=="verifikasi"?
+                                    <>
+                                        <RadioGroup
+                                            label="Status Verifikasi"
+                                            items={[
+                                                {
+                                                id: "belum_terverifikasi",
+                                                text: "Belum Terverifikasi",
+                                                },
+                                                {
+                                                id: "terverifikasi",
+                                                text: "Terverifikasi",
+                                                },
+                                                {
+                                                id: "gagal_terverifikasi",
+                                                text: "Gagal Terverifikasi",
+                                                }
+                                            ]}
+                                            selected={statusVerifikasi}
+                                            handlerChange={setStatusVerifikasi}
+                                        />
+
+                                        {statusVerifikasi=="gagal_terverifikasi" && 
+                                            <div className="w-full relative">
+                                                <label className="block text-sm font-medium text-gray-900 mb-2">
+                                                    Catatan Gagal Verifikasi
+                                                </label>
+                                                <div className="flex flex-col space-y-2">
+                                                    <textarea
+                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-800 resize-none"
+                                                        rows={4}
+                                                        value={catatan}
+                                                        onChange={(e)=> setCatatan(e.target.value)}
+                                                        placeholder="Tulis sesuatu di sini..."/>
                                                 </div>
                                             </div>
-                                            <button onClick={handlerResetFile}>
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-6 w-6"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12"
-                                                />
-                                                </svg>
-                                            </button>
+                                        }
+
+                                        <label className="block text-sm font-medium text-gray-900 mb-2">
+                                            File
+                                        </label>
+                                        <iframe src={`/pelaporan_pelaksanaan/?`.replace("?",file)} type="application/pdf" className="w-full min-h-180"></iframe>
+                                    </>:
+                                    <>
+                                        <label className="block text-sm font-medium text-gray-900 mb-2">
+                                            File
+                                        </label>
+                                        <div className="flex flex-col space-y-2">
+                                            <input
+                                                ref={fileRef}
+                                                type="file"
+                                                onChange={handleFileChange}
+                                                accept="application/pdf"
+                                                className={`w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white`}
+                                            />
+                                            <label className="block text-sm font-medium text-red-500 mb-2">Catatan:</label>
+                                            <ol className="list-decimal pl-10">
+                                                <li>ektensi file yang diterima <b>.PDF</b></li>  
+                                                <li>ukuran file yang di upload maksimal <b>5MB</b></li> 
+                                            </ol>
+                                            {file && (
+                                                <div className="bg-purple-50 border border-purple-400 rounded text-purple-800 text-sm p-2 flex justify-between">
+                                                    <div>
+                                                        <div className="flex items-center">
+                                                            <a target="_blank" href={filePreview==null? `/pelaporan_pelaksanaan/?`.replace("?",file):"#"}>
+                                                                {filePreview==null? file:filePreview}
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <button onClick={handlerResetFile}>
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className="h-6 w-6"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                        >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M6 18L18 6M6 6l12 12"
+                                                        />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
+                                    </>
+                                }
                             </div>
                         </div>
                     </div>
                     <div className="modal-footer">
-                    <button type="button" className="btn btn-primary" disabled={loadingModal} onClick={()=> openModal=="add"? createProcess() : updateProcess()}>
+                    <button type="button" className="btn btn-primary" disabled={loadingModal} onClick={()=> openModal=="add"? createProcess() : openModal=="verifikasi"? verifikasiProcess() : updateProcess()}>
                         Simpan
                     </button>
                     </div>
@@ -503,8 +622,19 @@ const renderJenisDokumen = (jenisDokumen) => {
         {output}
     </span>
 }
-const Items = ({idx, mataProgram, jenisDokumen, file=null, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}, level}) => {
-    return <div key={idx} className="relative bg-white shadow-md rounded-lg p-4 border-l-4 border-green-500">
+function renderColorCard(status=null){
+    if(status=="terverifikasi") return "border-green-500";
+    if(status=="gagal_terverifikasi") return "border-red-700";
+    return "border-gray-500 ";
+}
+function renderBadge(status=null){
+    if(status=="terverifikasi") return <span class="w-fit px-2 py-1 mt-3 text-xs font-semibold rounded-full bg-green-700 text-white ml-auto">Terverifikasi</span>;
+    if(status=="gagal_terverifikasi") return <span class="w-fit px-2 py-1 mt-3 text-xs font-semibold rounded-full bg-red-700 text-white ml-auto">Gagal Terverifikasi</span>;
+    return <span class="w-fit px-2 py-1 mt-3 text-xs font-semibold rounded-full bg-gray-500 text-white ml-auto">Belum Terverifikasi</span>;
+}
+const Items = ({idx, mataProgram, jenisDokumen, file=null, status_verifikasi, catatan, open=false, actionHandler=()=>{}, deleteHandler=()=>{}, editHandler=()=>{}, verifikasiHandler=()=>{}, detailHandler=()=>{}, level}) => {
+    return <div key={idx} className={`relative bg-white shadow-md rounded-lg pl-4 pr-4 pt-4 pb-3 border-l-4 ${renderColorCard(status_verifikasi)}`}>
+                <div className="flex flex-col">
                     <p className="text-sm font-semibold break-words mb-3 me-4">{mataProgram}</p>
                     <table className="text-sm w-full table-fixed">
                         <tr>
@@ -515,22 +645,29 @@ const Items = ({idx, mataProgram, jenisDokumen, file=null, open=false, actionHan
                             <td className="w-28 align-top" width={100}>File</td>
                             <td class="break-words">: <a href={file==null? "#":`${baseUrl}/pelaporan_dokumen/${file}`} target="_blank">Klik disini</a></td>
                         </tr>
+                        <tr>
+                            <td className="w-28 align-top" width={100}>Catatan</td>
+                            <td class="break-words">: <a href="#" onClick={detailHandler}>Klik disini</a></td>
+                        </tr>
                     </table>
-                    {
-                        ["auditee"].includes(level) && 
-                        <div className="absolute top-3 right-3">
-                            <button className="p-2 rounded-full hover:bg-gray-200" onClick={actionHandler}>
-                                <BsThreeDotsVertical  />
-                            </button>
-                            {open && <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border border-gray-200 rounded-md overflow-hidden z-50">
-                                <ul className="!py-1 !px-1 mb-0">
-                                    <li className="py-2 text-black hover:bg-gray-100 cursor-pointer" onClick={()=>deleteHandler()}>Hapus</li>
-                                    <li className="py-2 text-black hover:bg-gray-100 cursor-pointer" onClick={()=>editHandler()}>Edit</li>
-                                </ul>
-                            </div>}
-                        </div>
-                    }
-                </div>
+                    {renderBadge(status_verifikasi)}
+                </div>        
+                {
+                    ["auditee","admin"].includes(level) && 
+                    <div className="absolute top-3 right-3">
+                        <button className="p-2 rounded-full hover:bg-gray-200" onClick={actionHandler}>
+                            <BsThreeDotsVertical  />
+                        </button>
+                        {open && <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border border-gray-200 rounded-md overflow-hidden z-50">
+                            <ul className="!py-1 !px-1 mb-0">
+                                {level=="auditee" &&<li className="py-2 text-black hover:bg-gray-100 cursor-pointer" onClick={()=>deleteHandler()}>Hapus</li>}
+                                {level=="auditee" &&<li className="py-2 text-black hover:bg-gray-100 cursor-pointer" onClick={()=>editHandler()}>Edit</li>}
+                                {level=="admin" && <li className="py-2 text-black hover:bg-gray-100 cursor-pointer" onClick={()=>verifikasiHandler()}>Verifikasi</li>}
+                            </ul>
+                        </div>}
+                    </div>
+                }
+            </div>
 }
 
 export default PelaporanDokumen;

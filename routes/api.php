@@ -53,5 +53,6 @@ Route::get('/aktivitas/{id}', [ApiAktivitasController::class, 'detail'])->name('
 Route::get('/pelaporan_dokumen', [ApiPelaporanDokumenController::class, 'index'])->name('api_pelaporan_dokumen.index');
 Route::post('/pelaporan_dokumen', [ApiPelaporanDokumenController::class, 'store'])->name('api_pelaporan_dokumen.store');
 Route::put('/pelaporan_dokumen', [ApiPelaporanDokumenController::class, 'update'])->name('api_pelaporan_dokumen.update');
+Route::put('/pelaporan_dokumen/verifikasi', [ApiPelaporanDokumenController::class, 'verifikasi'])->name('api_pelaporan_dokumen.verifikasi');
 Route::delete('/pelaporan_dokumen/{id}', [ApiPelaporanDokumenController::class, 'destroy'])->name('api_pelaporan_dokumen.destroy');
 Route::get('/pelaporan_dokumen/{id}', [ApiPelaporanDokumenController::class, 'detail'])->name('api_pelaporan_dokumen.detail');
